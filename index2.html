@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+<head>
+  <title>Global Banlist System Documentation</title>
+  <meta charset='utf-8'/>
+  <meta name='description' content='Documentation website'/>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'/>
+  <link href='assets.css' rel='stylesheet' type='text/css'>
+</head>
+<body>  
+  <nav id='sidebar'>
+	<h1>Global Banlist System</h1>
+<ul id='links'>
+  
+    
+    <li><a href='#/response-status-codes'>Kody odpowiedzi</a></li>
+    
+  
+    
+    <li><a href='#/authentication'>Autoryzacja</a></li>
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+  
+  <li><h2>Stuff</h2>
+    <ul>
+    
+              
+        <li class=''><a href='#'></a></li>
+      
+    
+              
+        <li class='GET'><a href='#/get-stuff'>Pobranie wszystkich banlist</a></li>
+              
+        <li class='POST'><a href='#/post-a-thing'>Sprawdzenie w banliście</a></li>
+
+      
+    
+    </ul>
+  </li>
+
+</ul>
+</nav>
+
+<section id='content'>
+
+  <article class=''>
+    <a name='/response-status-codes' href='#/response-status-codes'><h2>Kody odpowiedzi</h2></a>
+    <section class='body'>
+      <h3 id="success">Success</h3>
+
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">GET</code>, <code class="language-plaintext highlighter-rouge">POST</code> zwracają status <code class="language-plaintext highlighter-rouge">200 OK</code>, gdy operacja się powiedzie,</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">Status: 200 OK</code></p>
+
+<h3 id="error">Error</h3>
+
+<p>Błędne odpowiedzi zwracają <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html">standard HTTP error codes</a> z dodatkowymi informacjami:</p>
+
+<ul>
+  <li>Kod błędu jest odsyłany jako HTTP status header,</li>
+  <li>Treść zawiera powód jak i komunikat (do celów debugowania i / lub wyświetlania),</li>
+</ul>
+
+<p>Przykład błędnej odpowiedzi:</p>
+
+<p><code class="language-plaintext highlighter-rouge">HTTP Status: 401</code>
+<code class="language-plaintext highlighter-rouge">{
+    server: 'serwer1.pl',
+    message: 'Podaj control word!'
+}</code></p>
+
+<p>Wszystkie kody błedow:</p>
+<p>
+<code class="language-plaintext highlighter-rouge">201 - Brak control_word w zapytaniu do celu zapytania,
+202 - Cel nie mógł pobrać adresu IP twojej maszyny,
+203 - Brak danych w zapytaniu do celu zapytania,
+204 - Błąd serwera autoryzacji u celu zapytania,
+206 - Błąd autoryzacji pomiędzy twoją maszyną a celem zapytania,
+</code></p>
+    </section>
+  </article>
+
+  <article class=''>
+    <a name='/authentication' href='#/authentication'><h2>Autoryzacja</h2></a>
+    <section class='body'>
+     
+
+<h3 id="response">Request</h3>
+
+<p>Dane potrzebne do autoryzacji otrzymasz od arbitra. W celu uzyskania odpowiedzi dodaj do zapytania poniższe nagłówki:</p>
+
+<p><code class="language-plaintext highlighter-rouge">CF-Access-Client-Id: XXX
+CF-Access-Client-Secret: XXX
+</code></p>
+
+<p>Błędy odpowiedzi możesz przejrzeć tutaj: <a href='#/response-status-codes'>Błędy odpowiedzi</a>.</p>
+
+    </section>
+  </article>
+
+  <article class='GET'>
+    <a name='/get-stuff' href='#/get-stuff'><h2><code><b>GET</b> /bansystem/clientlist</code> Pobranie wszystkich banlist</h2></a>
+    <section class='body'>
+      <p>Ta metoda pozwala na pozyskanie w array'u wszystkich linków, które trzeba będzie zapytać o interesujące nas dane.</p>
+
+<h3 id="request">Request</h3>
+
+<ul>
+  <li>W zapytaniu musisz umieścić <strong><a href='#/authentication'>ważne dane autoryzacyjne</a></strong>. W przeciwnym razie operacja się nie powiedzie.</li>
+</ul>
+
+<h3 id="response">Response (Odpowiedź)</h3>
+
+<p>W odpowiedzi uzyskasz linki, które potrzebne są do dalszych zapytań.</p>
+
+<p><code class="language-plaintext highlighter-rouge">Status: 200 OK</code>
+<code class="language-plaintext highlighter-rouge">{
+   "serwer1.pl":"https://serwer1.pl/api/bansystem/checkbanlist",
+   "serwer2.pl":"https://serwer2.pl/bansystem1/checkbanlist",
+   "serwer3.pl":"https://serwer3.pl/checkbanlist",  
+   "serwer4.pl":"https://serwer4.pl/dowolnatrasadlategomasztopobrac" 
+}
+</code></p>
+
+<p>Błędy odpowiedzi możesz przejrzeć tutaj: <a href='#/response-status-codes'>Błędy odpowiedzi</a>.</p>
+
+    </section>
+  </article>
+
+  <article class='POST'>
+    <a name='/post-a-thing' href='#/post-a-thing'><h2><code><b>POST</b> każdy link z góry</code> Sprawdzenie w banliście</h2></a>
+    <section class='body'>
+      <p>Ta metoda jest uniwersalna ponieważ bazuje na wielu czynnikach, zabezpieczeniach i przyjętych w grupie zasadach. Służy do sprawdzenia czy dany klient posiada bana u kogoś/wszystkich w sieci.</p>
+
+<h3 id="request">Request (Zapytanie)</h3>
+
+<ul>
+  <li>Pola <strong>control_word</strong> oraz <strong>danych</strong> nie mogą być puste, a <code class="language-plaintext highlighter-rouge">dane</code> muszą zawierać przynajmniej jeden z paramterów: <code class="language-plaintext highlighter-rouge">uid</code>,<code class="language-plaintext highlighter-rouge">ip</code>,<code class="language-plaintext highlighter-rouge">mytsid</code>.</li>
+</ul>
+
+
+<p>
+Przykład zapytania z jednym parametrem danych
+<code class="language-plaintext highlighter-rouge">{
+  control_word: 'kod uzyskany od arbitra',
+  dane: 
+  {
+    ip: '1.1.1.1'
+  }
+}</code></p>
+
+<p>
+Przykład zapytania z wszystkimi możliwymi parametrami danych
+<code class="language-plaintext highlighter-rouge">{
+  control_word: 'kod uzyskany od arbitra',
+  dane: 
+  {
+    uid: 'BvtE4kTmroVRU9jbBfGVhFQndxc=',
+    ip: '1.1.1.1',
+    mytsid: 'examplemytsid'
+  }
+}</code></p>
+
+<h3 id="response">Response (Odpowiedź)</h3>
+
+<p><strong>Odpowiedź prawidłowa</strong> powinna zwrócić dane w postaci JSON jak na poniższym przykładzie.</p>
+
+<p><code class="language-plaintext highlighter-rouge">Status: 200</code>
+Przykład prawidłowej odpowiedzi w przypadku nie znalezienia szukanych danych/ukaranej osoby.
+<code class="language-plaintext highlighter-rouge">{
+   "success":true,
+   "server":"serwer1.pl",
+   "data":"[[],[]]"
+}</code>
+
+Przykład prawidłowej odpowiedzi w przypadku  znalezienia szukanych danych/ukaranej osoby.
+<code class="language-plaintext highlighter-rouge">W przypadku odnalezienia danych do pola "data" zostaną dodane zakodowane w JSON
+wszystkie informacje danych pozycji z banlisty.
+</code>
+</p>
+
+<p>Jeśli otrzymasz błędną odpowiedź sprawdź <a href='#/response-status-codes'>kody odpowiedzi</a>.</p>
+
+    </section>
+  </article>
+
+
+
+</section>
+
+  
+  <!--[if lt IE 9]><script src='http://html5shim.googlecode.com/svn/trunk/html5.js'></script><![endif]-->
+  <script src='assets.js' type='text/javascript'></script>
+  <script>require('boot');</script>
+</body>
+
+</html>
